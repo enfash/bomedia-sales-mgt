@@ -1,0 +1,311 @@
+<title>BOMedia Cash Closing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,400;8..144,500;8..144,600;8..144,700&display=swap">
+<style>
+:root{
+  --page:#ecebe6;--ink:#20231f;--muted:#555a54;--rule:#d6d8d0;--note-bg:#ffffff;
+  /* App tokens (src/theme/tokens.ts, light) — frames always show the light app */
+  --a-bg:#f6f5f2;--a-surface:#ffffff;--a-variant:#efeee9;--a-on:#20231f;--a-onv:#555a54;--a-line:#e1e3dc;
+  --admin:#2b3493;--admin-c:#dfe0ff;--admin-on:#080f59;
+  --staff:#cc5500;--staff-c:#ffdbc7;--staff-on:#351000;
+  --caution:#f8e2a8;--caution-on:#3d2e00;--owing:#ffdad6;--owing-on:#410002;--settled:#d6e8cf;--settled-on:#0f2008;
+  --dot-final:#3f7d2c;--dot-review:#c28a00;--dot-open:#8a8f86;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#121411;--ink:#edf0e7;--muted:#bdc4b6;--rule:#343a31;--note-bg:#1c1f1b;color-scheme:dark}}
+:root[data-theme="dark"]{--page:#121411;--ink:#edf0e7;--muted:#bdc4b6;--rule:#343a31;--note-bg:#1c1f1b;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--page);color:var(--ink);font-family:"Roboto Flex",Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding-inline:20px;padding-block:28px 48px;line-height:1.45}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header h1{font-size:26px;font-weight:700;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:70ch}
+.decisions{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:16px}
+.decisions div{background:var(--note-bg);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;font-size:13px}
+.decisions b{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:600}
+.board-label{font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 8px}
+.scroll{overflow-x:auto;padding-bottom:6px}
+.row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+/* ---- app frames ---- */
+.app{background:var(--a-bg);color:var(--a-on);border:1px solid var(--rule);border-radius:14px;overflow:hidden;font-size:14px;font-variant-numeric:tabular-nums}
+.desk{width:1200px;display:flex;min-height:760px}
+.side{width:232px;background:var(--a-surface);border-right:1px solid var(--a-line);padding:16px;display:flex;flex-direction:column;gap:6px}
+.brand{background:var(--a-surface);border:1px solid var(--a-line);border-radius:8px;padding:10px;font-weight:800;letter-spacing:.5px;color:var(--admin);text-align:center}
+.brand small{display:block;font-size:10px;letter-spacing:1.2px;color:var(--a-onv);font-weight:600;margin-top:2px}
+.nav{padding:10px 14px;border-radius:8px;color:var(--a-onv);font-weight:500}
+.nav.on{background:var(--admin-c);color:var(--admin-on)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{height:64px;background:var(--a-surface);border-bottom:1px solid var(--a-line);display:flex;align-items:center;padding:0 24px;gap:12px}
+.top .t{flex:1}.top h2{margin:0;font-size:20px;font-weight:600}.top p{margin:0;font-size:12px;color:var(--a-onv)}
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;background:var(--a-variant);color:var(--a-onv);white-space:nowrap}
+.chip.caution{background:var(--caution);color:var(--caution-on)}.chip.owing{background:var(--owing);color:var(--owing-on)}.chip.settled{background:var(--settled);color:var(--settled-on)}.chip.admin{background:var(--admin-c);color:var(--admin-on)}
+.content{padding:24px;display:flex;flex-direction:column;gap:20px}
+
+/* ---- day navigator (redesigned) ---- */
+.daybar{background:var(--a-surface);border:1px solid var(--a-line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:12px}
+.daybar-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.stepper{display:flex;align-items:center;gap:6px}
+.icon-btn{width:40px;height:40px;flex:none;border-radius:999px;display:grid;place-items:center;border:1px solid var(--a-line);background:var(--a-surface);color:var(--a-on);cursor:pointer;padding:0}
+.icon-btn:hover{background:var(--a-variant)}
+.icon-btn[aria-disabled="true"]{opacity:.35;cursor:default;background:var(--a-surface)}
+.icon-btn svg{width:18px;height:18px}
+.datepick{display:flex;align-items:center;gap:12px;padding:4px 12px 4px 4px;border-radius:12px;border:1px solid transparent;background:none;color:inherit;font:inherit;cursor:pointer;text-align:left;min-width:0}
+.datepick:hover{background:var(--a-variant);border-color:var(--a-line)}
+.cal{width:44px;height:48px;border-radius:10px;border:1px solid var(--a-line);overflow:hidden;display:flex;flex-direction:column;flex:none;background:var(--a-surface)}
+.cal span{background:var(--admin);color:#fff;font-size:10px;font-weight:700;letter-spacing:1px;text-align:center;padding:2px 0}
+.cal b{flex:1;display:grid;place-items:center;font-size:19px;font-weight:700;line-height:1}
+.datepick .dl{display:flex;flex-direction:column;min-width:196px}
+.datepick .dl strong{font-size:17px;font-weight:700;display:flex;align-items:center;gap:6px}
+.datepick .dl strong svg{width:14px;height:14px;color:var(--a-onv)}
+.datepick .dl small{font-size:12.5px;color:var(--a-onv);white-space:nowrap}
+.today-btn{border:1px solid var(--admin);color:var(--admin);background:var(--a-surface);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.today-btn:hover{background:var(--admin-c)}
+.spacer{flex:1}
+.sync{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--a-onv);white-space:nowrap}
+.sync .live{width:8px;height:8px;border-radius:50%;background:var(--dot-final)}
+.refresh{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--a-line);border-radius:999px;background:var(--a-surface);color:var(--admin);font:inherit;font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer}
+.refresh:hover{background:var(--a-variant)}
+.refresh svg{width:16px;height:16px}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;border-top:1px solid var(--a-line);padding-top:12px}
+.day{border:1px solid transparent;border-radius:12px;padding:8px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;font:inherit;color:inherit;cursor:pointer}
+.day:hover{background:var(--a-variant)}
+.day .wd{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--a-onv)}
+.day .dn{font-size:17px;font-weight:600;line-height:1.2}
+.day .st{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--a-onv);white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;flex:none}
+.dot.final{background:var(--dot-final)}.dot.review{background:var(--dot-review)}.dot.open{border:1.5px solid var(--dot-open)}.dot.none{background:var(--a-line)}
+.day.sel{background:var(--admin-c);border-color:var(--admin);color:var(--admin-on)}
+.day.sel .wd,.day.sel .st{color:var(--admin-on)}
+.day.today .dn{color:var(--admin)}
+.day.today .wd::after{content:" · Today"}
+.day.sel.today .dn{color:var(--admin-on)}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.card{background:var(--a-surface);border:1px solid var(--a-line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.card h3{margin:0;font-size:16px;font-weight:700}.card .sub{margin:-10px 0 0;font-size:12px;color:var(--a-onv)}
+.lbl{font-size:12px;color:var(--a-onv);font-weight:500}
+.hero{font-size:30px;font-weight:600;letter-spacing:-.3px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pair>div{display:flex;flex-direction:column;gap:2px}
+.big{font-size:22px;font-weight:600}
+.diff{border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.diff.short{background:var(--owing);color:var(--owing-on)}.diff.over{background:var(--settled);color:var(--settled-on)}
+.diff b{font-size:18px}
+.lines{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--a-line);padding-top:12px}
+.lines div{display:flex;justify-content:space-between;font-size:13px;color:var(--a-onv)}.lines div span:last-child{color:var(--a-on)}
+.lines div.total{font-weight:600;color:var(--a-on);border-top:1px solid var(--a-line);padding-top:6px}
+.status{border:1px solid var(--a-line);border-left:0;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--a-variant)}
+.status.review{background:#fff6dc;border-color:#ecd9a0}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border-radius:999px;padding:10px 18px;font-weight:600;font-size:14px;border:1px solid var(--a-line);background:var(--a-surface);color:var(--admin)}
+.btn.fill{background:var(--admin);color:#fff;border-color:var(--admin)}.btn.staff{background:var(--staff);color:#fff;border-color:var(--staff)}
+.btn.dis{opacity:.45}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:500;color:var(--a-onv);font-size:12px;padding:8px 6px;border-bottom:1px solid var(--a-line)}
+td{padding:10px 6px;border-bottom:1px solid var(--a-line)}td.n,th.n{text-align:right}
+.field{border:1px solid #777b73;border-radius:8px;padding:14px 12px 10px;position:relative;font-size:16px;background:var(--a-surface)}
+.field i{position:absolute;top:-8px;left:10px;background:var(--a-surface);padding:0 4px;font-style:normal;font-size:11px;color:var(--a-onv)}
+.field.focus{border:2px solid var(--staff)}.field.focus i{color:var(--staff)}
+.seg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.seg span{border:1px solid var(--a-line);border-radius:10px;padding:10px;font-weight:500;text-align:center;font-size:13px}
+.seg span.on{background:var(--staff-c);color:var(--staff-on);border-color:var(--staff)}
+.phone{width:390px}
+.ph-top{background:var(--a-surface);border-bottom:1px solid var(--a-line);padding:14px 16px;font-weight:600;font-size:18px}
+.ph-body{padding:16px;display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--a-line);background:var(--a-surface);font-size:10px;text-align:center;color:var(--a-onv)}
+.tabs span{padding:10px 0 12px}.tabs span.on{color:var(--staff);font-weight:700}
+.sheet{width:390px;background:var(--a-surface);border-radius:28px 28px 0 0;border:1px solid var(--rule);padding:12px 20px 24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 -6px 24px rgba(0,0,0,.08);color:var(--a-on);font-size:14px;font-variant-numeric:tabular-nums}
+.handle{width:48px;height:5px;border-radius:3px;background:var(--a-line);margin:0 auto}
+.sheet h3{margin:0;font-size:18px}
+.note{font-size:12.5px;color:var(--muted);max-width:60ch;margin:8px 0 0}
+.note b{color:var(--ink)}
+.small{font-size:12px;color:var(--a-onv)}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Cash closing: count, difference and admin finalization</h1>
+  <p>Draft layouts for migration 010, built on the existing Cash tab, its shared tokens and role colours. Figures are the product specification's worked example (§11 case 8), not real trading data.</p>
+  <div class="decisions">
+    <div><b>Who counts</b>Staff and admin record closing counts. Both see expected cash and the difference straight away.</div>
+    <div><b>Recounts</b>Anyone may recount until the day is finalized. Every count is kept; the latest one is used.</div>
+    <div><b>Past days</b>Staff count today only. Admin may record a count for an earlier day, flagged as backfilled.</div>
+    <div><b>Finalize</b>Admin only. Saves a snapshot. Later entries for that day mark it Needs review; the snapshot never changes. Reopen needs a reason.</div>
+  </div>
+</header>
+
+<section>
+  <p class="board-label">Desktop · admin · finalized day with a late entry</p>
+  <div class="scroll"><div class="app desk">
+    <div class="side">
+      <div class="brand">BOMEDIA<small>SALES MANAGEMENT</small></div>
+      <div class="nav">New sale</div><div class="nav">Records</div><div class="nav">Customers</div><div class="nav">Payments</div><div class="nav on">Cash</div>
+    </div>
+    <div class="main">
+      <div class="top"><div class="t"><h2>Cash</h2><p>The shared drawer: opening, outgoing entries and closing count</p></div><span class="chip caution">Needs review</span><span class="chip">Development</span></div>
+      <div class="content">
+        <div class="daybar" id="daybar">
+          <div class="daybar-top">
+            <div class="stepper">
+              <button class="icon-btn" id="prev" aria-label="Previous day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+              <button class="datepick" aria-label="Choose a date">
+                <span class="cal"><span id="calM">SEP</span><b id="calD">28</b></span>
+                <span class="dl"><strong><span id="rel">Yesterday</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></strong><small id="full">Monday, 28 September 2026</small></span>
+              </button>
+              <button class="icon-btn" id="next" aria-label="Next day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+            </div>
+            <button class="today-btn" id="toToday">Jump to today</button>
+            <div class="spacer"></div>
+            <div class="sync"><span class="live"></span><span>Synced 09:12</span>
+              <button class="refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/></svg>Refresh drawer</button>
+            </div>
+          </div>
+          <div class="strip" id="strip" role="tablist" aria-label="Last seven days"></div>
+        </div>
+        <div class="cols">
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div class="card">
+              <h3>Closing count</h3>
+              <div class="pair">
+                <div><span class="lbl">Expected cash</span><span class="big">₦26,000.00</span></div>
+                <div><span class="lbl">Counted · Staff Two, 19:48</span><span class="big">₦25,500.00</span></div>
+              </div>
+              <div class="diff short"><span>Short by</span><b>₦500.00</b></div>
+              <div class="lines">
+                <div><span>Opening count · Staff One</span><span>₦10,000.00</span></div>
+                <div><span>Cash received</span><span>+ ₦25,000.00</span></div>
+                <div><span>Cash expenses</span><span>− ₦4,000.00</span></div>
+                <div><span>Cash withdrawals</span><span>− ₦5,000.00</span></div>
+                <div class="total"><span>Expected cash</span><span>₦26,000.00</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Counts for this day</h3><p class="sub">Every count is kept. The latest one is used for the difference.</p>
+              <table><thead><tr><th>Time</th><th>Counted by</th><th class="n">Counted</th><th></th></tr></thead>
+              <tbody><tr><td>19:48</td><td>Staff Two</td><td class="n">₦25,500.00</td><td><span class="chip settled">Used</span></td></tr>
+              <tr><td>19:31</td><td>Staff One</td><td class="n">₦25,000.00</td><td><span class="chip">Replaced</span></td></tr></tbody></table>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div class="card">
+              <h3>Day status</h3>
+              <div class="status review">
+                <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip admin">Finalized</span><span class="chip caution">Needs review</span></div>
+                <div>Finalized by <b>Admin</b> at 21:14. Snapshot: expected ₦26,000.00, counted ₦25,500.00, short ₦500.00.</div>
+                <div><b>1 entry</b> was added for this day after finalization. Expected cash has changed by <b>− ₦1,500.00</b> since the snapshot.</div>
+                <div class="small">The saved snapshot does not change. Reopen the day to recount and finalize again.</div>
+              </div>
+              <div class="btns"><span class="btn">Reopen day</span></div>
+              <div class="lines"><div><span>Finalization note</span><span>—</span></div></div>
+            </div>
+            <div class="card">
+              <h3>Outside the drawer</h3><p class="sub">POS and transfers stay separate from physical cash.</p>
+              <div class="pair"><div><span class="lbl">POS collected</span><span class="big" style="font-size:18px">₦12,000.00</span></div><div><span class="lbl">Transfers collected</span><span class="big" style="font-size:18px">₦31,500.00</span></div></div>
+            </div>
+            <div class="card">
+              <h3>Reopened before</h3>
+              <div class="small">None for this day. Each reopen keeps the earlier finalization, who reopened it, when, and the reason.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="note">The day navigator is one card: arrows step a day at a time, the date itself opens a calendar picker, and <b>Jump to today</b> only appears when you're on an earlier day. The seven-day strip shows each day's close state at a glance (finalized, needs review, open, no entries) so an admin can spot an unreviewed day without paging back. Try the arrows and day tiles. Next is disabled on today; days after today never appear.</p>
+  <p class="note">The topbar chip repeats the day's state so the admin sees <b>Needs review</b> without scrolling. The count, difference and arithmetic sit together so a shortage is read beside its causes.</p>
+</section>
+
+<section>
+  <p class="board-label">Phone · staff · today · count saved, then admin finalize sheet</p>
+  <div class="row">
+    <div class="app phone">
+      <div class="ph-top">Cash</div>
+      <div class="ph-body">
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip">Open · not finalized</span><span class="chip">Development</span></div>
+        <div class="card" style="padding:16px">
+          <h3>Closing count</h3>
+          <div class="pair">
+            <div><span class="lbl">Expected</span><span class="big" style="font-size:19px">₦26,000.00</span></div>
+            <div><span class="lbl">Counted · you, 19:48</span><span class="big" style="font-size:19px">₦25,500.00</span></div>
+          </div>
+          <div class="diff short"><span>Short by</span><b>₦500.00</b></div>
+          <div class="small">Anyone can recount until admin finalizes the day. The latest count is used.</div>
+        </div>
+        <div class="card" style="padding:16px">
+          <h3>Record an entry</h3>
+          <div class="seg"><span>Opening cash</span><span class="on">Closing count</span><span>Expense</span><span>Withdrawal</span></div>
+          <div class="field focus"><i>Counted cash (₦)</i>25,500.00</div>
+          <div class="small">Count every note and coin in the drawer now. Cash only.</div>
+          <span class="btn staff" style="text-align:center">Review count</span>
+        </div>
+      </div>
+      <div class="tabs"><span>New sale</span><span>Records</span><span>Customers</span><span>Payments</span><span class="on">Cash</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="sheet">
+        <div class="handle"></div>
+        <h3>Finalize Tue 29 Sep 2026</h3>
+        <div class="lines" style="border-top:0;padding-top:0">
+          <div><span>Opening count</span><span>₦10,000.00</span></div>
+          <div><span>Cash received</span><span>+ ₦25,000.00</span></div>
+          <div><span>Cash expenses</span><span>− ₦4,000.00</span></div>
+          <div><span>Cash withdrawals</span><span>− ₦5,000.00</span></div>
+          <div class="total"><span>Expected cash</span><span>₦26,000.00</span></div>
+          <div class="total" style="border-top:0;padding-top:0"><span>Counted (latest)</span><span>₦25,500.00</span></div>
+        </div>
+        <div class="diff short"><span>Short by</span><b>₦500.00</b></div>
+        <div class="field"><i>Note (optional)</i><span style="color:#8a8f86">Explain the shortage if known</span></div>
+        <div class="small">This saves the figures above as the day's close. Entries added for this day later will mark it Needs review instead of changing it. Unsynced entries on other devices are not included.</div>
+        <span class="btn fill" style="text-align:center">Finalize day</span>
+      </div>
+      <p class="note" style="max-width:390px">Admin sees the same sheet on desktop as a bounded dialog. If no opening was recorded, the note becomes required and the difference shows as unavailable.</p>
+    </div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+  // Illustrative close states for the week ending today (Tue 29 Sep 2026)
+  var TODAY = new Date(2026, 8, 29);
+  var states = {23:'final',24:'final',25:'final',26:'final',27:'none',28:'review',29:'open'};
+  var labels = {final:'Finalized',review:'Needs review',open:'Open',none:'No entries'};
+  var WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var WDL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var ML = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var sel = new Date(2026, 8, 28);
+  var strip = document.getElementById('strip');
+
+  function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+  function diffDays(a,b){return Math.round((a-b)/864e5);}
+
+  function render(){
+    var d = diffDays(TODAY, sel);
+    document.getElementById('rel').textContent = d===0?'Today':d===1?'Yesterday':d+' days ago';
+    document.getElementById('full').textContent = WDL[sel.getDay()]+', '+sel.getDate()+' '+ML[sel.getMonth()]+' '+sel.getFullYear();
+    document.getElementById('calM').textContent = ML[sel.getMonth()].slice(0,3).toUpperCase();
+    document.getElementById('calD').textContent = sel.getDate();
+    document.getElementById('next').setAttribute('aria-disabled', d===0?'true':'false');
+    document.getElementById('toToday').hidden = d===0;
+
+    // strip: 7 days ending at max(today, sel+3) capped to today
+    var end = new Date(sel); end.setDate(end.getDate()+3);
+    if (end > TODAY) end = new Date(TODAY);
+    strip.innerHTML = '';
+    for (var i=6;i>=0;i--){
+      var day = new Date(end); day.setDate(end.getDate()-i);
+      var st = (day.getMonth()===8 && states[day.getDate()]) || 'final';
+      var b = document.createElement('button');
+      b.className = 'day'+(sameDay(day,sel)?' sel':'')+(sameDay(day,TODAY)?' today':'');
+      b.setAttribute('role','tab');
+      b.setAttribute('aria-selected', sameDay(day,sel));
+      b.innerHTML = '<span class="wd">'+WD[day.getDay()]+'</span><span class="dn">'+day.getDate()+'</span><span class="st"><span class="dot '+st+'"></span>'+labels[st]+'</span>';
+      (function(dd){ b.onclick=function(){ sel=dd; render(); }; })(day);
+      strip.appendChild(b);
+    }
+  }
+  document.getElementById('prev').onclick=function(){ sel=new Date(sel); sel.setDate(sel.getDate()-1); render(); };
+  document.getElementById('next').onclick=function(){ if (diffDays(TODAY,sel)>0){ sel=new Date(sel); sel.setDate(sel.getDate()+1); render(); } };
+  document.getElementById('toToday').onclick=function(){ sel=new Date(TODAY); render(); };
+  render();
+})();
+</script>
