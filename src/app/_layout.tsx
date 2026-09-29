@@ -1,18 +1,44 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
+import { use } from 'react';
+import { AuthGate, AuthProfile } from '@/features/auth/auth-gate';
+import { Stack } from 'expo-router/stack';
+import { ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router/react-navigation';
+import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
+import { PaperProvider } from 'react-native-paper';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { createAppTheme, lightTheme } from '@/theme/theme';
 
-SplashScreen.preventAutoHideAsync();
+export { ErrorBoundary } from 'expo-router';
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
+  return <PaperProvider theme={lightTheme}><AuthGate><AppNavigation /></AuthGate></PaperProvider>;
+}
+
+function AppNavigation() {
+  const isDark = useColorScheme() === 'dark';
+  const profile = use(AuthProfile);
+  const theme = createAppTheme(profile?.role ?? 'staff', isDark);
+  const navigationTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme : DefaultTheme).colors,
+      primary: theme.colors.primary,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.onSurface,
+      border: theme.colors.outlineVariant,
+      notification: theme.colors.error,
+    },
+  };
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <PaperProvider theme={theme}>
+      <ThemeProvider value={navigationTheme}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </PaperProvider>
   );
 }
